@@ -27,54 +27,66 @@
         <h1 class="title">Hastane Randevu</h1>
         <h6 class="location">
           <i class="fas fa-map-marker-alt"></i
-          ><span id="locationAddr">Tepebasi, Eskisehir</span>
+          ><span id="locationAddr">Bilinmiyor</span>
         </h6>
       </div>
 
-      <ul class="messages">
+      <ul class="messages" id="messages">
         <li class="message incoming">Merhaba, hosgeldiniz...Adiniz ?</li>
         <li class="message outgoing">Ali Emir</li>
-        <li class="message incoming">Size nasil yardimci olabilirim</li>
-        <li class="message outgoing">
-          Falan filan oyle boyle Lorem, ipsum. Lorem ipsum dolor, sit amet
-          consectetur adipisicing elit. Tempora, odit.
-        </li>
-        <li class="message incoming">Hmm, demek oyle boyle cok ilginc.</li>
-        <li class="message incoming">
-          Size soyle boyle onerebilirim. Lorem ipsum dolor sit, amet consectetur
-          adipisicing elit. Sequi inventore aspernatur fugit!
-        </li>
-        <li class="message outgoing">Tesekkurler.</li>
-        <li class="message incoming">Size nasil yardimci olabilirim</li>
-        <li class="message outgoing">Falan filan oyle boyle</li>
-        <li class="message incoming">Hmm, demek oyle boyle cok ilginc.</li>
-        <li class="message incoming">
-          Size soyle boyle onerebilirim. Lorem, ipsum dolor sit amet consectetur
-          adipisicing elit. Excepturi, totam iure nisi quaerat, quidem
-          consequuntur incidunt molestias ut deleniti vel odio iste ducimus illo
-          vero aspernatur suscipit unde molestiae officia.
-        </li>
-        <li class="message outgoing">Tesekkurler.</li>
-        <li class="message incoming">Size nasil yardimci olabilirim</li>
-        <li class="message outgoing">Falan filan oyle boyle</li>
-        <li class="message incoming">Hmm, demek oyle boyle cok ilginc.</li>
-        <li class="message incoming">Size soyle boyle onerebilirim.</li>
-        <li class="message outgoing">Tesekkurler.</li>
       </ul>
+      <div class="text-input">
+        <input
+          type="text"
+          class="userspeech"
+          value=""
+          placeholder="Yazmak icin dokunun veya konusun"
+        />
+        <button class="sendMessageBtn" onclick="handleSendMessage()">
+          <i class="fa fa-paper-plane"></i>
+        </button>
+      </div>
       <div class="actionButtons">
-        <div class="button small ripple"><i class="fas fa-heart"></i></div>
-        <div class="button small ripple">
+        <div
+          class="button small ripple"
+          id="volumeBtn"
+          onclick="handleVolume()"
+        >
+          <i class="fas fa-volume-up"></i>
+        </div>
+        <div
+          class="button small ripple"
+          id="locationBtn"
+          onclick="handleLocation()"
+        >
           <i class="fas fa-map-marker-alt"></i>
         </div>
-        <div class="button busy big ripple">
+        <div
+          class="button big ripple"
+          id="microphoneBtn"
+          onclick="handleMicrophone()"
+        >
           <i class="fas fa-microphone"></i>
         </div>
-        <div class="button small ripple"><i class="fas fa-font"></i></div>
-        <div class="button small ripple"><i class="fas fa-moon"></i></div>
+        <div
+          class="button small ripple"
+          id="readabilityBtn"
+          onclick="handleReadability()"
+        >
+          <i class="fas fa-font"></i>
+        </div>
+        <div
+          class="button small ripple"
+          id="nightModeBtn"
+          onclick="handleNightMode()"
+        >
+          <i class="fas fa-moon"></i>
+        </div>
       </div>
       <div class="footer">
         <span class="bottom_text">Tasarim Surecleri ~ ESOGU 2019</span>
       </div>
     </div>
   </body>
+  <script src="script.js"></script>
 </html>

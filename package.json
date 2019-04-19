@@ -1,5 +1,11 @@
 {
   "scripts": {
-    "scss": "sass --watch style.scss style.css"
+    "start": "",
+    "scss": "sass --watch style.scss style.css",
+    "browser": "browser-sync start --directory --server --files \"*.css, *.html, *.js\""
+  },
+  "dependencies": {
+    "browser-sync": "^2.26.3",
+    "sass": "^1.18.0"
   }
 }
