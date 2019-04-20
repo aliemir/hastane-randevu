@@ -4,16 +4,59 @@ const state = {
   synth: null,
   utterMessage: null,
   settings: {
+    speechSupported: 0,
     volume: 1,
     readability: 0,
     night: 0
+  },
+  user: {
+    name: '',
+    tc: 0,
+    symptoms: [],
+    clinic: '',
+    hospital: null
   },
   location: {
     longitude: 0,
     latitude: 0,
     name: ''
-  },
-  name: 'a'
+  }
+};
+
+const database = {
+  hospitals: [
+    {
+      name: 'yunus emre',
+      location: {
+        longitude: 0,
+        latitude: 0
+      }
+    },
+    {
+      name: 'sehir hastanesi',
+      location: {
+        longitude: 0,
+        latitude: 0
+      }
+    },
+    {
+      name: 'izmir devlet hastanesi',
+      location: {
+        longitude: 0,
+        latitude: 0
+      }
+    }
+  ],
+  symp2clinic: [
+    {
+      words: ['bas', 'agriyor', 'agri'],
+      clinics: ['kbb', 'noroloji', 'dahiliye']
+    },
+    {
+      words: ['mide', 'bulan', 'bulanti'],
+      clinics: ['dahiliye', 'baska bi yer']
+    }
+  ]
 };
 
 const elements = {
@@ -36,6 +79,22 @@ const elements = {
 
 const initializeSpeechSynthesis = () => {
   state.synth = window.speechSynthesis;
+};
+
+const findNearestHospital = (location, hospitals) => {
+  return hospitals.sort((h1, h2) => {
+    const h1Distance = Math.sqrt(
+      Math.pow(location.longitude - h1.location.longitude, 2) +
+        Math.pow(location.latitude - h1.location.latitude, 2)
+    );
+    const h2Distance = Math.sqrt(
+      Math.pow(location.longitude - h2.location.longitude, 2) +
+        Math.pow(location.latitude - h2.location.latitude, 2)
+    );
+    if (h1Distance > h2Distance) return 1;
+    else if (h2Distance > h1Distance) return -1;
+    else return 0;
+  })[0];
 };
 
 const synthMessage = message => {
@@ -92,7 +151,7 @@ const toggleInterimClass = () => {
   }
 };
 
-const handleRecognitionResults = function(event) {
+const handleRecognitionResults = event => {
   if (typeof event.results === 'undefined') {
     state.recognition.stop();
     return;
@@ -216,10 +275,6 @@ const createMessage = (type, msg) => {
     elements.messages.appendChild(message);
     elements.messages.scrollTop = elements.messages.scrollHeight;
   }
-};
-
-window.onclick = function(e) {
-  console.log(e.target);
 };
 
 window.onload = () => {

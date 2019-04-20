@@ -70,10 +70,8 @@
 }
 
 .text-input {
-  width: 80%;
+  width: 100%;
   margin-top: 10px;
-  margin-left: auto;
-  margin-right: auto;
 }
 .text-input .sendMessageBtn {
   height: 34px;
@@ -82,7 +80,7 @@
   border-radius: 10px;
   box-shadow: 0 0 0 1px #fab0d0;
   position: absolute;
-  margin-left: -33px;
+  margin-left: -34px;
   padding-right: 2px;
   font-size: 14pt;
   background-color: #ffe8f0;

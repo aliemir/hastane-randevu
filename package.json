@@ -1,8 +1,7 @@
 {
   "scripts": {
-    "start": "",
-    "scss": "sass --watch style.scss style.css",
-    "browser": "browser-sync start --directory --server --files \"*.css, *.html, *.js\""
+    "start": "sass style.scss style.css",
+    "scss": "sass --watch style.scss style.css"
   },
   "dependencies": {
     "browser-sync": "^2.26.3",

@@ -105,10 +105,8 @@ $color-night-button-border: #5a666b;
   }
 }
 .text-input {
-  width: 80%;
+  width: 100%;
   margin-top: 10px;
-  margin-left: auto;
-  margin-right: auto;
   .sendMessageBtn {
     height: 34px;
     width: 34px;
@@ -116,7 +114,7 @@ $color-night-button-border: #5a666b;
     border-radius: 10px;
     box-shadow: 0 0 0 1px $color-border;
     position: absolute;
-    margin-left: -33px;
+    margin-left: -34px;
     padding-right: 2px;
     font-size: 14pt;
     background-color: $color-outgoing;
