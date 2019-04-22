@@ -58,11 +58,15 @@ const database = {
   ],
   symp2clinic: [
     {
-      words: ['bas', 'agriyor', 'agri'],
+      id: 101,
+      bodyPart: 'bas',
+      complaint: ['agriyor', 'agri'],
       clinics: ['kbb', 'noroloji', 'dahiliye']
     },
     {
-      words: ['mide', 'bulan', 'bulanti'],
+      id: 102,
+      bodyPart: 'mide',
+      words: ['bulan', 'bulanti'],
       clinics: ['dahiliye', 'baska bi yer']
     }
   ]
@@ -78,6 +82,7 @@ const elements = {
   messages: document.querySelector('.messages'),
   userSpeechInput: document.querySelector('.userspeech'),
   nightElements: [
+    document.querySelector('.startBtn'),
     document.querySelector('.header'),
     document.querySelector('.assistant'),
     ...document.querySelectorAll('.message'),
@@ -104,6 +109,15 @@ const findNearestHospital = (location, hospitals) => {
     else if (h2Distance > h1Distance) return -1;
     else return 0;
   })[0];
+};
+
+const stemMessage = message => {
+  console.log(message.split(' '));
+};
+
+const checkSymptomMatch = () => {
+  console.log('asd');
+  //return symptom id or -1;
 };
 
 const synthMessage = message => {
@@ -278,6 +292,8 @@ const createMessage = (type, msg, messagelist) => {
     message.innerHTML = msg;
     messagelist.appendChild(message);
     messagelist.scrollTop = messagelist.scrollHeight;
+
+    //Update Night Elements
     elements.nightElements = [
       document.querySelector('.startBtn'),
       document.querySelector('.header'),
@@ -294,11 +310,6 @@ window.onload = () => {
   initializeSpeechSynthesis();
 };
 
-const getInfo = (messageTemplate, callbackFunc) => {
-  createMessage('incoming', messageTemplate, elements.messages);
-  state.userMessageCallbackFunction = callbackFunc;
-};
-
 /*
 const gotInfo = (messageTemplate, middleware, nextFunc) => {
   return function(message) {
@@ -308,12 +319,20 @@ const gotInfo = (messageTemplate, middleware, nextFunc) => {
   };
 }; */
 
+const getInfo = (messageTemplate, callbackFunc) => {
+  createMessage('incoming', messageTemplate, elements.messages);
+  state.userMessageCallbackFunction = callbackFunc;
+};
+
 const getApprove = (nextFunc, rejectFunc) => {
   return function(message) {
     if (
-      ['evet', 'onaylıyorum', 'onay', 'doğru', 'aynen'].includes(
-        message.toLowerCase()
-      )
+      message
+        .toLowerCase()
+        .split(' ')
+        .filter(el =>
+          ['evet', 'onaylıyorum', 'onay', 'doğru', 'aynen'].includes(el)
+        )
     ) {
       nextFunc();
     } else {
@@ -323,62 +342,83 @@ const getApprove = (nextFunc, rejectFunc) => {
 };
 
 const gotName = message => {
+  if (message.length < 5 || message.split(' ').length < 2) {
+    createMessage('incoming', 'Adınız ve soyadınız hatalı görünüyor. 🧐');
+    getInfo('Adınız ve soyadınız ?', gotName);
+  }
   createMessage(
     'incoming',
-    `Adiniz, ${message}. Onayliyor musunuz ?`,
+    `Adınız ve soyadınız, ${message}. Onaylıyor musunuz ?`,
     elements.messages
   );
   state.user.name = message;
   state.userMessageCallbackFunction = getApprove(
     () => {
-      getInfo('TC Kimlik numaraniz ?', gotID);
+      getInfo('TC Kimlik numaranız ?', gotID);
     },
     () => {
-      getInfo('Adiniz ve soyadiniz ?', gotName);
+      getInfo('Adınız ve soyadınız ?', gotName);
     }
   );
 };
 
 const gotID = message => {
-  const id = parseFloat(message.split(' ').join(''));
+  const id = parseFloat(message.replace(/\D/g, ''));
   if (!(id > 10000000000 && id < 100000000000)) {
     createMessage(
       'incoming',
-      'TC kimlik numaraniz hatali gorunuyor. 🧐',
+      'TC Kimlik numaranız hatalı görünüyor. 🧐',
       elements.messages
     );
-    getInfo('TC Kimlik numaraniz ?', gotID);
+    getInfo('TC Kimlik numaranız ?', gotID);
   } else {
     createMessage(
       'incoming',
-      `TC Kimlik Numaraniz, ${id
+      `TC Kimlik numaranız, ${id
         .toString()
         .match(/.{3}|.{1,2}/g)
-        .join(' ')}. Onayliyor musunuz ?`,
+        .join(' ')}. Onaylıyor musunuz ?`,
       elements.messages
     );
     state.user.tc = id;
     state.userMessageCallbackFunction = getApprove(
       () => {
-        getInfo('Belirtiler fazi', getSymptom);
+        createMessage(
+          'incoming',
+          'Bilgileriniz kaydedildi, teşekkürler.',
+          elements.messages
+        );
+        diagnosePhase();
       },
       () => {
-        getInfo('TC Kimlik numaraniz ?', gotID);
+        getInfo('TC Kimlik numaranız ?', gotID);
       }
     );
   }
 };
 
-const getSymptom = () => {
-  console.log(state.user.name);
-  console.log(state.user.tc);
+const gotSymptom = message => {
+  if (checkSymptomMatch(message)) {
+    //sikayetiniz alindi, baska bir sikayetiniz varsa dinliyorum.
+    //sikayeti state.user.symptoms a id ile kaydet.
+    //baska bir sikayetiniz var mi ?(getApprove, rejectFunc = () => {getMostRelevantClinicFromSymptoms()})
+  } else {
+    //sikayetinizi algilayamadim, lutfen tekrar deneyin.
+  }
 };
 
-const welcomePhase = () => {
+const diagnosePhase = () => {
+  getInfo(
+    'Şikâyetlerinizi dinlemeye hazırım..  İlk şikâyetiniz nedir ?',
+    gotSymptom
+  );
+};
+
+const startConversation = () => {
   createMessage(
     'incoming',
-    'Merhaba randevu robotuna hoşgeldiniz! 🐣🐣',
+    'Merhaba, randevu robotuna hoşgeldiniz! 🐣🐣',
     elements.messages
   );
-  getInfo('Adiniz ve soyadiniz ?', gotName);
+  getInfo('Adınız ve Soyadınız ?', gotName);
 };

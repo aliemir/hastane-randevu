@@ -135,16 +135,21 @@ $color-night-button-border: #5a666b;
 .startBtn {
   padding: 10px;
   border-radius: 5px;
-  background: $color-outgoing;
+  background: $color-title;
   border: 1px solid $color-button-border;
   font-weight: 500;
   text-transform: uppercase;
-  color: $color-night-outgoing;
+  color: #fff;
+  text-shadow: 1px 1px 1px $color-night-outgoing;
   &:hover {
     box-shadow: inset 0 0 4px 0px $color-border;
   }
   &:focus {
     outline: 0;
+  }
+  &.night {
+    background: $color-night-outgoing;
+    border: 1px solid $color-night-button-border;
   }
 }
 
