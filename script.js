@@ -20,8 +20,17 @@ const state = {
     longitude: 0,
     latitude: 0,
     name: ''
-  }
+  },
+  conversationStatus: '',
+  userMessageCallbackFunction: null
 };
+/* Convesation Status List
+ * WELCOME - get name and citizen ID
+ * DIAGNOSE - get desired number of symptoms and compare in background
+ * APPOINTMENT - get nearest hospital with location
+ * CLOSING - end conversation and ask for start over
+ * HALT - end
+ */
 
 const database = {
   hospitals: [
@@ -98,6 +107,10 @@ const findNearestHospital = (location, hospitals) => {
 };
 
 const synthMessage = message => {
+  message = message.replace(
+    /([\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g,
+    ''
+  );
   const voices = state.synth.getVoices();
   state.utterMessage = new SpeechSynthesisUtterance(message);
   state.utterMessage.voice = state.synth
@@ -128,10 +141,7 @@ const initializeSpeechRecognition = () => {
 };
 
 const processUserMessage = message => {
-  if (state.settings.volume) {
-    synthMessage(message);
-  }
-  createMessage('incoming', message);
+  createMessage('incoming', message, elements.messages);
 };
 
 const handleRecognitionStart = () => {
@@ -252,32 +262,123 @@ const handleNightMode = () => {
 const handleSendMessage = () => {
   const msg = elements.userSpeechInput.value;
   elements.userSpeechInput.value = '';
-  createMessage('outgoing', msg);
-  processUserMessage(msg);
-
-  //check this again
-  elements.nightElements = [
-    document.querySelector('.header'),
-    document.querySelector('.assistant'),
-    ...document.querySelectorAll('.message'),
-    document.querySelector('.userspeech'),
-    document.querySelectorAll('.button')
-  ];
+  createMessage('outgoing', msg, elements.messages);
+  state.userMessageCallbackFunction(msg);
 };
 
-const createMessage = (type, msg) => {
+const createMessage = (type, msg, messagelist) => {
   //type = 'incoming' || 'outgoing'
   //typeof(message) = string
   if ((type == 'incoming' || type == 'outgoing') && typeof msg == 'string') {
+    if (type == 'incoming' && state.settings.volume) {
+      synthMessage(msg);
+    }
     const message = document.createElement('li');
     message.classList.add('message', type);
     message.innerHTML = msg;
-    elements.messages.appendChild(message);
-    elements.messages.scrollTop = elements.messages.scrollHeight;
+    messagelist.appendChild(message);
+    messagelist.scrollTop = messagelist.scrollHeight;
+    elements.nightElements = [
+      document.querySelector('.startBtn'),
+      document.querySelector('.header'),
+      document.querySelector('.assistant'),
+      ...document.querySelectorAll('.message'),
+      document.querySelector('.userspeech'),
+      document.querySelectorAll('.button')
+    ];
   }
 };
 
 window.onload = () => {
   initializeSpeechRecognition();
   initializeSpeechSynthesis();
+};
+
+const getInfo = (messageTemplate, callbackFunc) => {
+  createMessage('incoming', messageTemplate, elements.messages);
+  state.userMessageCallbackFunction = callbackFunc;
+};
+
+/*
+const gotInfo = (messageTemplate, middleware, nextFunc) => {
+  return function(message) {
+    createMessage('incoming', messageTemplate, elements.messages);
+    middleware(message);
+    state.userMessageCallbackFunction = nextFunc();
+  };
+}; */
+
+const getApprove = (nextFunc, rejectFunc) => {
+  return function(message) {
+    if (
+      ['evet', 'onaylıyorum', 'onay', 'doğru', 'aynen'].includes(
+        message.toLowerCase()
+      )
+    ) {
+      nextFunc();
+    } else {
+      rejectFunc();
+    }
+  };
+};
+
+const gotName = message => {
+  createMessage(
+    'incoming',
+    `Adiniz, ${message}. Onayliyor musunuz ?`,
+    elements.messages
+  );
+  state.user.name = message;
+  state.userMessageCallbackFunction = getApprove(
+    () => {
+      getInfo('TC Kimlik numaraniz ?', gotID);
+    },
+    () => {
+      getInfo('Adiniz ve soyadiniz ?', gotName);
+    }
+  );
+};
+
+const gotID = message => {
+  const id = parseFloat(message.split(' ').join(''));
+  if (!(id > 10000000000 && id < 100000000000)) {
+    createMessage(
+      'incoming',
+      'TC kimlik numaraniz hatali gorunuyor. 🧐',
+      elements.messages
+    );
+    getInfo('TC Kimlik numaraniz ?', gotID);
+  } else {
+    createMessage(
+      'incoming',
+      `TC Kimlik Numaraniz, ${id
+        .toString()
+        .match(/.{3}|.{1,2}/g)
+        .join(' ')}. Onayliyor musunuz ?`,
+      elements.messages
+    );
+    state.user.tc = id;
+    state.userMessageCallbackFunction = getApprove(
+      () => {
+        getInfo('Belirtiler fazi', getSymptom);
+      },
+      () => {
+        getInfo('TC Kimlik numaraniz ?', gotID);
+      }
+    );
+  }
+};
+
+const getSymptom = () => {
+  console.log(state.user.name);
+  console.log(state.user.tc);
+};
+
+const welcomePhase = () => {
+  createMessage(
+    'incoming',
+    'Merhaba randevu robotuna hoşgeldiniz! 🐣🐣',
+    elements.messages
+  );
+  getInfo('Adiniz ve soyadiniz ?', gotName);
 };
