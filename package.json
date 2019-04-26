@@ -5,6 +5,7 @@
   },
   "dependencies": {
     "browser-sync": "^2.26.3",
-    "sass": "^1.18.0"
+    "sass": "^1.18.0",
+    "snowball": "^0.3.1"
   }
 }

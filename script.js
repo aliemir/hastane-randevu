@@ -3,6 +3,7 @@ const state = {
   recognitionActive: 0,
   synth: null,
   utterMessage: null,
+  stemmer: new Snowball('Turkish'),
   settings: {
     speechSupported: 0,
     volume: 1,
@@ -22,7 +23,9 @@ const state = {
     name: ''
   },
   conversationStatus: '',
-  userMessageCallbackFunction: null
+  userMessageCallbackFunction: () => {
+    return;
+  }
 };
 /* Convesation Status List
  * WELCOME - get name and citizen ID
@@ -37,15 +40,15 @@ const database = {
     {
       name: 'yunus emre',
       location: {
-        longitude: 0,
-        latitude: 0
+        longitude: 10,
+        latitude: 10
       }
     },
     {
       name: 'sehir hastanesi',
       location: {
-        longitude: 0,
-        latitude: 0
+        longitude: 3,
+        latitude: 3
       }
     },
     {
@@ -59,14 +62,14 @@ const database = {
   symp2clinic: [
     {
       id: 101,
-      bodyPart: 'bas',
-      complaint: ['agriyor', 'agri'],
+      bodyPart: 'baş',
+      complaint: ['ağrıyor', 'ağrı'],
       clinics: ['kbb', 'noroloji', 'dahiliye']
     },
     {
       id: 102,
       bodyPart: 'mide',
-      words: ['bulan', 'bulanti'],
+      words: ['bulan', 'bula', 'bulantı'],
       clinics: ['dahiliye', 'baska bi yer']
     }
   ]
@@ -112,12 +115,45 @@ const findNearestHospital = (location, hospitals) => {
 };
 
 const stemMessage = message => {
-  console.log(message.split(' '));
+  //Convert to lowercase, remove punctuation, remove emojis and split every word into array.
+  let tokenize = message
+    .toLowerCase()
+    .replace(/[.,?&%@!]|/g, '')
+    .replace(
+      /([\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g,
+      ''
+    )
+    .split(' ');
+  //map through every words in array and tokenize each of them with stemmer
+  let tokenized = tokenize.map(t => {
+    state.stemmer.setCurrent(t);
+    state.stemmer.stem();
+    return state.stemmer.getCurrent();
+  });
+  return tokenized;
 };
 
-const checkSymptomMatch = () => {
-  console.log('asd');
-  //return symptom id or -1;
+const checkSymptomMatch = message => {
+  const tokenArr = stemMessage(message);
+  const symptoms = database.symp2clinic;
+  const foundSymptomPlaces = symptoms.filter(el =>
+    tokenArr.includes(el.bodyPart)
+  );
+  const foundMatchingComplaintsByPlace = foundSymptomPlaces.filter(el => {
+    if (el.complaint.filter(comp => tokenArr.includes(comp)).length > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  });
+  foundMatchingComplaintsByPlace.forEach(sym => {
+    state.user.symptoms.push(sym.id);
+  });
+  if (foundMatchingComplaintsByPlace.length > 0) {
+    return true;
+  } else {
+    return false;
+  }
 };
 
 const synthMessage = message => {
@@ -399,12 +435,52 @@ const gotID = message => {
 
 const gotSymptom = message => {
   if (checkSymptomMatch(message)) {
-    //sikayetiniz alindi, baska bir sikayetiniz varsa dinliyorum.
-    //sikayeti state.user.symptoms a id ile kaydet.
-    //baska bir sikayetiniz var mi ?(getApprove, rejectFunc = () => {getMostRelevantClinicFromSymptoms()})
+    createMessage(
+      'incoming',
+      'Şikâyetiniz kaydedildi. Başka bir şikâyetiniz var mı ?',
+      elements.messages
+    );
+    state.userMessageCallbackFunction = getApprove(
+      () => {
+        getInfo('Şikâyetiniz nedir ?', gotSymptom);
+      },
+      () => {
+        createMessage('incoming', 'simdilik bu kadar.', elements.messages);
+        suggestionPhase();
+      }
+    );
   } else {
     //sikayetinizi algilayamadim, lutfen tekrar deneyin.
   }
+};
+
+const suggestionPhase = () => {
+  //getWeightedClinicSuggestion();
+  //state.user.clinic
+  createMessage('incoming', 'Size onerilen poliklinik, x', elements.messages);
+  createMessage(
+    'incoming',
+    'En yakin hastaneden randevu almak ister misiniz?',
+    elements.messages
+  );
+  state.userMessageCallbackFunction = getApprove(
+    () => {
+      appointmentPhase();
+    },
+    () => {
+      createMessage('Gorusme sonlandirildi.');
+      state.userMessageCallbackFunction = () => {
+        createMessage('incoming', 'dukkan kapandi krdesm', elemenets.messages);
+      };
+    }
+  );
+};
+
+const appointmentPhase = () => {
+  console.log('not done');
+  //findNearestHospital(state.location,database.hospitals);
+  //createMessage('incoming','En yakin hastane: x, y poliklinigi icin en uygun tarih z, randevuyu onayliyor musunuz ?',elements.messages);
+  //state.userMessageCallbackFunction = getApprove();
 };
 
 const diagnosePhase = () => {
