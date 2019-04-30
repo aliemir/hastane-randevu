@@ -11,6 +11,7 @@ $color-button-border: #fac5da;
 $color-mic: #fc4c4e;
 $color-mic-active: #ff3f3f;
 $color-title: #fc4c4e;
+$color-disabled-button: #cc4c4e;
 $color-button-s: #fc4c4eaf;
 $color-location: #fc4c4eaf;
 $color-assistant-background: #f9f8f0;
@@ -151,6 +152,10 @@ $color-night-button-border: #5a666b;
     background: $color-night-outgoing;
     border: 1px solid $color-night-button-border;
   }
+  &:disabled {
+    box-shadow: inset 0px 0px 0px 1px rgba(0, 0, 0, 0.3);
+    background: $color-disabled-button;
+  }
 }
 
 .text-input {
@@ -203,11 +208,11 @@ $color-night-button-border: #5a666b;
   font-size: $font-size-readability !important;
 }
 .messages {
+  flex-grow: 15;
   scroll-behavior: smooth;
   box-shadow: 0px 20px 50px -60px rgba(0, 0, 0, 0.75);
   font-size: $font-size-msg;
   width: 100%;
-  height: 68%;
   font-family: $main-font-family;
   font-weight: 300;
   padding-top: 1vh;

@@ -42,34 +42,39 @@ const database = {
       location: {
         longitude: 10,
         latitude: 10
-      }
+      },
+      earliestDateAvailable: ''
     },
     {
       name: 'sehir hastanesi',
       location: {
         longitude: 3,
         latitude: 3
-      }
+      },
+      earliestDateAvailable: ''
     },
     {
       name: 'izmir devlet hastanesi',
       location: {
         longitude: 0,
         latitude: 0
-      }
+      },
+      earliestDateAvailable: ''
     }
   ],
   symp2clinic: [
     {
       id: 101,
-      bodyPart: 'baş',
+      alias: 'baş ağrısı',
+      bodyPart: ['baş'],
       complaint: ['ağrıyor', 'ağrı'],
       clinics: ['kbb', 'noroloji', 'dahiliye']
     },
     {
       id: 102,
-      bodyPart: 'mide',
-      words: ['bulan', 'bula', 'bulantı'],
+      alias: 'mide bulantısı',
+      bodyPart: ['mide', 'mi'],
+      complaint: ['bulan', 'bula', 'bulantı', 'bulanmak'],
       clinics: ['dahiliye', 'baska bi yer']
     }
   ]
@@ -82,6 +87,7 @@ const elements = {
   microphoneBtn: document.querySelector('#microphoneBtn'),
   readabilityBtn: document.querySelector('#readabilityBtn'),
   nightModeBtn: document.querySelector('#nightModeBtn'),
+  startBtn: document.querySelector('#startBtn'),
   messages: document.querySelector('.messages'),
   userSpeechInput: document.querySelector('.userspeech'),
   nightElements: [
@@ -114,6 +120,34 @@ const findNearestHospital = (location, hospitals) => {
   })[0];
 };
 
+const getWeightedClinicSuggestion = () => {
+  let clinicsList = state.user.symptoms.map(s => {
+    if (database.symp2clinic.filter(d => d.id === s)[0]) {
+      return database.symp2clinic.filter(d => d.id === s)[0].clinics;
+    }
+  });
+  clinicsList = [].concat(...clinicsList);
+  let mf = 0;
+  let mfi;
+  let f = 0;
+  clinicsList.forEach(x => {
+    clinicsList.forEach(y => {
+      if (x == y) {
+        f++;
+        if (mf < f) {
+          mf = f;
+          mfi = x;
+        }
+      }
+    });
+    f = 0;
+  });
+  if (mf < 2 && state.user.symptoms.length > 1) {
+    mfi = 'Aile Hekimligi';
+  }
+  return mfi;
+};
+
 const stemMessage = message => {
   //Convert to lowercase, remove punctuation, remove emojis and split every word into array.
   let tokenize = message
@@ -136,9 +170,13 @@ const stemMessage = message => {
 const checkSymptomMatch = message => {
   const tokenArr = stemMessage(message);
   const symptoms = database.symp2clinic;
-  const foundSymptomPlaces = symptoms.filter(el =>
-    tokenArr.includes(el.bodyPart)
-  );
+  const foundSymptomPlaces = symptoms.filter(el => {
+    if (el.bodyPart.filter(part => tokenArr.includes(part)).length > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  });
   const foundMatchingComplaintsByPlace = foundSymptomPlaces.filter(el => {
     if (el.complaint.filter(comp => tokenArr.includes(comp)).length > 0) {
       return true;
@@ -157,10 +195,14 @@ const checkSymptomMatch = message => {
 };
 
 const synthMessage = message => {
-  message = message.replace(
-    /([\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g,
-    ''
-  );
+  message = message
+    .replace(
+      /([\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g,
+      ''
+    )
+    .replace(/\<.*?\>/g, '')
+    .replace(/\(.*?\)/g, '')
+    .replace(':', '  ');
   const voices = state.synth.getVoices();
   state.utterMessage = new SpeechSynthesisUtterance(message);
   state.utterMessage.voice = state.synth
@@ -189,11 +231,6 @@ const initializeSpeechRecognition = () => {
     state.recognition.onresult = handleRecognitionResults;
   }
 };
-
-const processUserMessage = message => {
-  createMessage('incoming', message, elements.messages);
-};
-
 const handleRecognitionStart = () => {
   toggleInterimClass();
 };
@@ -309,18 +346,39 @@ const handleNightMode = () => {
   }
 };
 
+const checkCode = message => {
+  if (message.split(' ').includes('/semptomlar')) {
+    const symptoms = database.symp2clinic.map(x => `<li>${x.alias}</li>`);
+    createMessage(
+      'incoming',
+      `Simdilik algilayabildigim sikayet sayisi : ${
+        symptoms.length
+      }.</br><ul style="padding-left:20px;">${symptoms.join('')}</ul>`,
+      elements.messages,
+      0
+    );
+    return true;
+  } else {
+    return false;
+  }
+};
+
 const handleSendMessage = () => {
+  state.synth.cancel();
   const msg = elements.userSpeechInput.value;
   elements.userSpeechInput.value = '';
+  if (checkCode(msg)) {
+    return true;
+  }
   createMessage('outgoing', msg, elements.messages);
   state.userMessageCallbackFunction(msg);
 };
 
-const createMessage = (type, msg, messagelist) => {
+const createMessage = (type, msg, messagelist, synthesize = 1) => {
   //type = 'incoming' || 'outgoing'
   //typeof(message) = string
   if ((type == 'incoming' || type == 'outgoing') && typeof msg == 'string') {
-    if (type == 'incoming' && state.settings.volume) {
+    if (type == 'incoming' && state.settings.volume && synthesize) {
       synthMessage(msg);
     }
     const message = document.createElement('li');
@@ -368,7 +426,7 @@ const getApprove = (nextFunc, rejectFunc) => {
         .split(' ')
         .filter(el =>
           ['evet', 'onaylıyorum', 'onay', 'doğru', 'aynen'].includes(el)
-        )
+        ).length > 0
     ) {
       nextFunc();
     } else {
@@ -379,23 +437,28 @@ const getApprove = (nextFunc, rejectFunc) => {
 
 const gotName = message => {
   if (message.length < 5 || message.split(' ').length < 2) {
-    createMessage('incoming', 'Adınız ve soyadınız hatalı görünüyor. 🧐');
+    createMessage(
+      'incoming',
+      'Adınız ve soyadınız hatalı görünüyor. 🧐',
+      elements.messages
+    );
     getInfo('Adınız ve soyadınız ?', gotName);
+  } else {
+    createMessage(
+      'incoming',
+      `Adınız ve soyadınız, ${message}. Onaylıyor musunuz ?`,
+      elements.messages
+    );
+    state.user.name = message;
+    state.userMessageCallbackFunction = getApprove(
+      () => {
+        getInfo('TC Kimlik numaranız ?', gotID);
+      },
+      () => {
+        getInfo('Adınız ve soyadınız ?', gotName);
+      }
+    );
   }
-  createMessage(
-    'incoming',
-    `Adınız ve soyadınız, ${message}. Onaylıyor musunuz ?`,
-    elements.messages
-  );
-  state.user.name = message;
-  state.userMessageCallbackFunction = getApprove(
-    () => {
-      getInfo('TC Kimlik numaranız ?', gotID);
-    },
-    () => {
-      getInfo('Adınız ve soyadınız ?', gotName);
-    }
-  );
 };
 
 const gotID = message => {
@@ -445,19 +508,120 @@ const gotSymptom = message => {
         getInfo('Şikâyetiniz nedir ?', gotSymptom);
       },
       () => {
-        createMessage('incoming', 'simdilik bu kadar.', elements.messages);
         suggestionPhase();
       }
     );
   } else {
     //sikayetinizi algilayamadim, lutfen tekrar deneyin.
+    createMessage(
+      'incoming',
+      'Uzgunum. Şikâyetinizi algilayamadim. Başka bir şikâyetiniz var mı ?',
+      elements.messages
+    );
+    state.userMessageCallbackFunction = getApprove(
+      () => {
+        getInfo('Şikâyetiniz nedir ?', gotSymptom);
+      },
+      () => {
+        suggestionPhase();
+      }
+    );
   }
 };
 
+const gotAppointment = message => {
+  if (state.location.longitude == 0) {
+    getInfo(
+      'Konumunuz bilinmiyor. Lutfen <i class="fas fa-map-marker-alt"></i> lokasyon butonuna tiklayin. Konumunuz belirlenince herhangi bir mesaj yazarak devam edebilirsiniz.',
+      gotAppointment
+    );
+  } else {
+    const nearest = findNearestHospital(state.location, database.hospitals);
+    const d = new Date();
+    let days = d.getDate();
+    days = days + Math.floor(Math.random() * (30 - days));
+    let month = d.getMonth();
+    let hours = 9 + Math.floor(Math.random() * 8);
+    hours = hours == 9 ? '0' + hours : hours;
+    let minutes = Math.floor(Math.random() * 5);
+    minutes = minutes == 0 ? '00' : minutes + '0';
+    const aylar = [
+      'Ocak',
+      'Şubat',
+      'Mart',
+      'Nisan',
+      'Mayıs',
+      'Haziran',
+      'Temmuz',
+      'Ağustos',
+      'Eylül',
+      'Ekim',
+      'Kasım',
+      'Aralık'
+    ];
+    const earliestDate =
+      days + ' ' + aylar[month] + ', saat ' + hours + ':' + minutes;
+    createMessage(
+      'incoming',
+      `Size en yakin hastane <strong>${nearest.name}</strong>... <strong>${
+        state.user.clinic
+      }</strong> poliklinigi icin en yakin randevu tarihi: <strong>${earliestDate}</strong>. Randevuyu onayliyor musunuz ?`,
+      elements.messages
+    );
+    state.userMessageCallbackFunction = getApprove(
+      () => {
+        acceptAppointment();
+      },
+      () => {
+        rejectAppointment();
+      }
+    );
+  }
+};
+
+const acceptAppointment = message => {
+  getInfo(
+    'Randevu kaydedildi! Lutfen randevu saatinden 15 dakika once hastanede olunuz. Gecmis olsun!',
+    () => {
+      createMessage(
+        'incoming',
+        'Tekrar baslamak icin sayfayi yenileyin...',
+        elements.messages
+      );
+    }
+  );
+};
+const rejectAppointment = message => {
+  getInfo('Uzgunum, size yardimci olamiyorum. Gorusme sonlandirildi', () => {
+    createMessage(
+      'incoming',
+      'Tekrar baslamak icin sayfayi yenileyin...',
+      'elements.messages'
+    );
+  });
+};
+
 const suggestionPhase = () => {
-  //getWeightedClinicSuggestion();
-  //state.user.clinic
-  createMessage('incoming', 'Size onerilen poliklinik, x', elements.messages);
+  state.user.clinic = getWeightedClinicSuggestion();
+  if (state.user.clinic == 'Aile Hekimligi' || state.user.clinic == undefined) {
+    getInfo(
+      'Uygun poliklinik bulunamadi. Lutfen aile hekiminize basvurun.',
+      () => {
+        createMessage(
+          'incoming',
+          'Tekrar baslamak icin sayfayi yenileyin...',
+          elements.messages
+        );
+      }
+    );
+    return false;
+  }
+  createMessage(
+    'incoming',
+    `Size onerilen poliklinik, <strong> ${state.user.clinic ||
+      'bulunamadi'} </strong>`,
+    elements.messages
+  );
   createMessage(
     'incoming',
     'En yakin hastaneden randevu almak ister misiniz?',
@@ -468,19 +632,27 @@ const suggestionPhase = () => {
       appointmentPhase();
     },
     () => {
-      createMessage('Gorusme sonlandirildi.');
-      state.userMessageCallbackFunction = () => {
-        createMessage('incoming', 'dukkan kapandi krdesm', elemenets.messages);
-      };
+      getInfo('Gorusme sonlandirildi.', () => {
+        createMessage(
+          'incoming',
+          'Tekrar baslamak icin sayfayi yenileyin...',
+          elements.messages
+        );
+      });
     }
   );
 };
 
 const appointmentPhase = () => {
-  console.log('not done');
-  //findNearestHospital(state.location,database.hospitals);
-  //createMessage('incoming','En yakin hastane: x, y poliklinigi icin en uygun tarih z, randevuyu onayliyor musunuz ?',elements.messages);
-  //state.userMessageCallbackFunction = getApprove();
+  if (state.location.longitude == 0) {
+    getInfo(
+      'Konumunuz bilinmiyor. Lutfen <i class="fas fa-map-marker-alt"></i> lokasyon butonuna tiklayin. Konumunuz belirlenince herhangi bir mesaj yazarak devam edebilirsiniz.',
+      gotAppointment
+    );
+  } else {
+    state.userMessageCallbackFunction = gotAppointment;
+    gotAppointment();
+  }
 };
 
 const diagnosePhase = () => {
@@ -491,6 +663,7 @@ const diagnosePhase = () => {
 };
 
 const startConversation = () => {
+  elements.startBtn.disabled = true;
   createMessage(
     'incoming',
     'Merhaba, randevu robotuna hoşgeldiniz! 🐣🐣',
