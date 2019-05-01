@@ -38,7 +38,7 @@ const state = {
 const database = {
   hospitals: [
     {
-      name: 'yunus emre',
+      name: 'Yunus Emre Devlet Hastanesi',
       location: {
         longitude: 10,
         latitude: 10
@@ -46,7 +46,7 @@ const database = {
       earliestDateAvailable: ''
     },
     {
-      name: 'sehir hastanesi',
+      name: 'Eskişehir Şehir Hastanesi',
       location: {
         longitude: 3,
         latitude: 3
@@ -54,10 +54,10 @@ const database = {
       earliestDateAvailable: ''
     },
     {
-      name: 'izmir devlet hastanesi',
+      name: 'İzmir Devlet Hastanesi',
       location: {
-        longitude: 0,
-        latitude: 0
+        longitude: 38.3305,
+        latitude: 26.7455
       },
       earliestDateAvailable: ''
     }
@@ -67,15 +67,15 @@ const database = {
       id: 101,
       alias: 'baş ağrısı',
       bodyPart: ['baş'],
-      complaint: ['ağrıyor', 'ağrı'],
-      clinics: ['kbb', 'noroloji', 'dahiliye']
+      complaint: ['ağrıyor', 'ağrı', 'ağrıs'],
+      clinics: ['K.B.B.', 'Nöroloji', 'Dahiliye']
     },
     {
       id: 102,
       alias: 'mide bulantısı',
       bodyPart: ['mide', 'mi'],
-      complaint: ['bulan', 'bula', 'bulantı', 'bulanmak'],
-      clinics: ['dahiliye', 'baska bi yer']
+      complaint: ['bulan', 'bula', 'bulantı', 'bulanmak', 'bulanıyor'],
+      clinics: ['Dahiliye', 'Gastroentereloji']
     }
   ]
 };
@@ -175,7 +175,7 @@ const getWeightedClinicSuggestion = () => {
     f = 0;
   });
   if (mf < 2 && state.user.symptoms.length > 1) {
-    mfi = 'Aile Hekimligi';
+    mfi = 'Aile Hekimliği';
   }
   return mfi;
 };
@@ -383,7 +383,7 @@ const checkCode = message => {
     const symptoms = database.symp2clinic.map(x => `<li>${x.alias}</li>`);
     createMessage(
       'incoming',
-      `Simdilik algilayabildigim sikayet sayisi : ${
+      `Şimdilik algılayabildiğim şikayet sayısı : ${
         symptoms.length
       }.</br><ul style="padding-left:20px;">${symptoms.join('')}</ul>`,
       elements.messages,
@@ -508,7 +508,7 @@ const gotID = message => {
       `TC Kimlik numaranız, ${id
         .toString()
         .match(/.{3}|.{1,2}/g)
-        .join(' ')}. Onaylıyor musunuz ?`,
+        .join('-')} . Onaylıyor musunuz ?`,
       elements.messages
     );
     state.user.tc = id;
@@ -547,7 +547,7 @@ const gotSymptom = message => {
     //sikayetinizi algilayamadim, lutfen tekrar deneyin.
     createMessage(
       'incoming',
-      'Uzgunum. Şikâyetinizi algilayamadim. Başka bir şikâyetiniz var mı ?',
+      'Üzgünüm. Şikâyetinizi algılayamadım. Başka bir şikâyetiniz var mı ?',
       elements.messages
     );
     state.userMessageCallbackFunction = getApprove(
@@ -564,7 +564,7 @@ const gotSymptom = message => {
 const gotAppointment = message => {
   if (state.location.longitude == 0) {
     getInfo(
-      'Konumunuz bilinmiyor. Lutfen <i class="fas fa-map-marker-alt"></i> lokasyon butonuna tiklayin. Konumunuz belirlenince herhangi bir mesaj yazarak devam edebilirsiniz.',
+      'Konumunuz bilinmiyor. Lütfen <i class="fas fa-map-marker-alt"></i> lokasyon butonuna tıklayın. Konumunuz belirlenince herhangi bir mesaj yazarak devam edebilirsiniz.',
       gotAppointment
     );
   } else {
@@ -595,9 +595,9 @@ const gotAppointment = message => {
       days + ' ' + aylar[month] + ', saat ' + hours + ':' + minutes;
     createMessage(
       'incoming',
-      `Size en yakin hastane <strong>${nearest.name}</strong>... <strong>${
+      `Size en yakın hastane: <strong>${nearest.name}</strong>... <strong>${
         state.user.clinic
-      }</strong> poliklinigi icin en yakin randevu tarihi: <strong>${earliestDate}</strong>. Randevuyu onayliyor musunuz ?`,
+      }</strong> polikliniği icin en yakın randevu tarihi: <strong>${earliestDate}</strong>. Randevuyu onaylıyor musunuz ?`,
       elements.messages
     );
     state.userMessageCallbackFunction = getApprove(
@@ -613,21 +613,21 @@ const gotAppointment = message => {
 
 const acceptAppointment = message => {
   getInfo(
-    'Randevu kaydedildi! Lutfen randevu saatinden 15 dakika once hastanede olunuz. Gecmis olsun!',
+    'Randevu kaydedildi! Lütfen randevu saatinden 15 dakika önce hastanede olunuz. Geçmis olsun!',
     () => {
       createMessage(
         'incoming',
-        'Tekrar baslamak icin sayfayi yenileyin...',
+        'Tekrar başlamak için sayfayı yenileyin...',
         elements.messages
       );
     }
   );
 };
 const rejectAppointment = message => {
-  getInfo('Uzgunum, size yardimci olamiyorum. Gorusme sonlandirildi', () => {
+  getInfo('Üzgünüm, size yardımcı olamıyorum. Görüşme sonlandırıldı.', () => {
     createMessage(
       'incoming',
-      'Tekrar baslamak icin sayfayi yenileyin...',
+      'Tekrar başlamak için sayfayı yenileyin...',
       'elements.messages'
     );
   });
@@ -635,13 +635,13 @@ const rejectAppointment = message => {
 
 const suggestionPhase = () => {
   state.user.clinic = getWeightedClinicSuggestion();
-  if (state.user.clinic == 'Aile Hekimligi' || state.user.clinic == undefined) {
+  if (state.user.clinic == 'Aile Hekimliği' || state.user.clinic == undefined) {
     getInfo(
-      'Uygun poliklinik bulunamadi. Lutfen aile hekiminize basvurun.',
+      'Uygun poliklinik bulunamadı. Lütfen aile hekiminize başvurun.',
       () => {
         createMessage(
           'incoming',
-          'Tekrar baslamak icin sayfayi yenileyin...',
+          'Tekrar başlamak için sayfayı yenileyin...',
           elements.messages
         );
       }
@@ -650,13 +650,13 @@ const suggestionPhase = () => {
   }
   createMessage(
     'incoming',
-    `Size onerilen poliklinik, <strong> ${state.user.clinic ||
-      'bulunamadi'} </strong>`,
+    `Size önerilen poliklinik, <strong> ${state.user.clinic ||
+      'bulunamadı'} </strong>`,
     elements.messages
   );
   createMessage(
     'incoming',
-    'En yakin hastaneden randevu almak ister misiniz?',
+    'En yakın hastaneden randevu almak ister misiniz?',
     elements.messages
   );
   state.userMessageCallbackFunction = getApprove(
@@ -664,10 +664,10 @@ const suggestionPhase = () => {
       appointmentPhase();
     },
     () => {
-      getInfo('Gorusme sonlandirildi.', () => {
+      getInfo('Görüşme sonlandırıldı.', () => {
         createMessage(
           'incoming',
-          'Tekrar baslamak icin sayfayi yenileyin...',
+          'Tekrar başlamak için sayfayı yenileyin...',
           elements.messages
         );
       });
@@ -678,7 +678,7 @@ const suggestionPhase = () => {
 const appointmentPhase = () => {
   if (state.location.longitude == 0) {
     getInfo(
-      'Konumunuz bilinmiyor. Lutfen <i class="fas fa-map-marker-alt"></i> lokasyon butonuna tiklayin. Konumunuz belirlenince herhangi bir mesaj yazarak devam edebilirsiniz.',
+      'Konumunuz bilinmiyor. Lütfen <i class="fas fa-map-marker-alt"></i> lokasyon butonuna tıklayın. Konumunuz belirlenince herhangi bir mesaj yazarak devam edebilirsiniz.',
       gotAppointment
     );
   } else {
