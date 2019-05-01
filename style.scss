@@ -25,6 +25,22 @@ $color-night-outgoing: #7e8889;
 $color-night-incoming: #bdc7c1;
 $color-night-button-border: #5a666b;
 
+@media all and (display-mode: standalone) {
+  .addToHomeScreenButton {
+    display: none;
+  }
+}
+.addToHomeScreenButton {
+  text-align: center;
+  width: 70%;
+  font-size: 10pt;
+  font-family: sans-serif;
+  box-sizing: border-box;
+  border-bottom: 2px solid $color-night-outgoing;
+  font-weight: 800;
+  padding: 5px;
+}
+
 @mixin buttonsizing($property) {
   height: $property;
   width: $property;
@@ -61,29 +77,29 @@ $color-night-button-border: #5a666b;
 }
 .addToHomeScreenPrompt {
   display: none;
-  position: absolute;
+  position: fixed;
+  display: flex;
   z-index: 3;
-  width: 50%;
-  height: 30%;
-  margin-left: 25vw;
-  margin-top: 25vh;
-  background: white;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
   font-family: sans-serif;
-  border-radius: 20px;
+  overflow: auto;
   box-shadow: 0 0 3px 0px $color-night-incoming;
   .promptAdd {
+    border: 1px solid $color-title;
     padding: 5px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 100%;
     width: 100%;
+    height: 100%;
     text-align: center;
     button {
       margin: 10px 0;
-      width: 80%;
+      width: 60%;
       height: 35px;
       border-radius: 10px;
       &:focus {
@@ -111,7 +127,6 @@ $color-night-button-border: #5a666b;
   flex-direction: column;
 
   padding-top: 0;
-  padding-bottom: 5px;
   box-sizing: border-box;
 
   width: 100%;
@@ -208,7 +223,7 @@ $color-night-button-border: #5a666b;
     border-radius: 10px;
     box-shadow: 0 0 0 1px $color-border;
     position: absolute;
-    margin-left: -34px;
+    margin-left: -35px;
     padding-right: 2px;
     font-size: 14pt;
     background-color: $color-outgoing;
@@ -284,7 +299,6 @@ $color-night-button-border: #5a666b;
   }
 }
 .actionButtons {
-  margin-bottom: 5px;
   border-bottom: 1px solid $color-border;
   flex-grow: 1;
   display: flex;
@@ -325,20 +339,4 @@ $color-night-button-border: #5a666b;
       @include buttonsizing(16px);
     }
   }
-}
-.footer {
-  .addToHomeScreenButton {
-    border-radius: 10px;
-    border: 1px solid $color-night-outgoing;
-    font-weight: 800;
-    padding: 5px 10px;
-    background: $color-night-incoming;
-  }
-  height: 14pt;
-  margin-bottom: 5px;
-  box-sizing: border-box;
-  font-size: $font-size-footer;
-  font-family: sans-serif;
-  font-weight: 300;
-  color: $color-footer;
 }
