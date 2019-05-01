@@ -28,6 +28,46 @@
   box-shadow: inset 0 0 0 1px #5a666b;
 }
 
+.addToHomeScreenPrompt {
+  display: none;
+  position: absolute;
+  z-index: 3;
+  width: 50%;
+  height: 30%;
+  margin-left: 25vw;
+  margin-top: 25vh;
+  background: white;
+  font-family: sans-serif;
+  border-radius: 20px;
+  box-shadow: 0 0 3px 0px #bdc7c1;
+}
+.addToHomeScreenPrompt .promptAdd {
+  padding: 5px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  text-align: center;
+}
+.addToHomeScreenPrompt .promptAdd button {
+  margin: 10px 0;
+  width: 80%;
+  height: 35px;
+  border-radius: 10px;
+}
+.addToHomeScreenPrompt .promptAdd button:focus {
+  outline: none;
+}
+.addToHomeScreenPrompt .promptAdd button.add {
+  background-color: #ffe8f0;
+}
+.addToHomeScreenPrompt .promptAdd button.cancel {
+  background-color: #fff7fa;
+}
+
 .assistant {
   background: linear-gradient(to bottom, rgba(220, 220, 220, 0.7) 0%, white 30%, white 100%);
   display: flex;
@@ -257,11 +297,20 @@
 }
 
 .footer {
-  height: 9pt;
+  height: 14pt;
+  margin-bottom: 5px;
+  box-sizing: border-box;
   font-size: 8pt;
   font-family: sans-serif;
   font-weight: 300;
   color: #0000007f;
+}
+.footer .addToHomeScreenButton {
+  border-radius: 10px;
+  border: 1px solid #7e8889;
+  font-weight: 800;
+  padding: 5px 10px;
+  background: #bdc7c1;
 }
 
 /*# sourceMappingURL=style.css.map */

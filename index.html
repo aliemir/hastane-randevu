@@ -5,6 +5,7 @@
     <title>Hasta Randevu Sesli Yanit Sistemi</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
+    <LINK rel="manifest" href="/manifest.json" />
     <link
       rel="stylesheet"
       href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
@@ -19,9 +20,47 @@
       href="https://fonts.googleapis.com/css?family=Pacifico"
       rel="stylesheet"
     />
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js').then(
+            function(registration) {
+              // Registration was successful
+              console.log(
+                'ServiceWorker registration successful with scope: ',
+                registration.scope
+              );
+            },
+            function(err) {
+              // registration failed :(
+              console.log('ServiceWorker registration failed: ', err);
+            }
+          );
+        });
+      }
+    </script>
   </head>
 
   <body>
+    <div id="addToHomeScreenPrompt" class="addToHomeScreenPrompt">
+      <div class="promptAdd">
+        Uygulamayi telefonunuza indirmek ister misiniz ?
+        <button
+          onclick="acceptHomeButtonPrompt()"
+          id="addScreenBtn"
+          class="add"
+        >
+          Evet! Ana Ekrana Ekle
+        </button>
+        <button
+          onclick="cancelHomeButtonPrompt()"
+          id="cancelHomeBtn"
+          class="cancel"
+        >
+          Hayir
+        </button>
+      </div>
+    </div>
     <div class="assistant">
       <div class="header">
         <h1 class="title">Hastane Randevu</h1>
@@ -91,7 +130,13 @@
         </div>
       </div>
       <div class="footer">
-        <span class="bottom_text">Tasarim Surecleri ~ ESOGU 2019</span>
+        <div
+          class="addToHomeScreenButton"
+          id="addToHomeScreen"
+          onclick="addToHomeScreenBtn()"
+        >
+          Uygulamayi Indir
+        </div>
       </div>
     </div>
   </body>

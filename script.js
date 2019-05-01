@@ -88,6 +88,8 @@ const elements = {
   readabilityBtn: document.querySelector('#readabilityBtn'),
   nightModeBtn: document.querySelector('#nightModeBtn'),
   startBtn: document.querySelector('#startBtn'),
+  addToHomeScreenBtn: document.querySelector('#addToHomeScreen'),
+  addToHomeScreenPrompt: document.querySelector('#addToHomeScreenPrompt'),
   messages: document.querySelector('.messages'),
   userSpeechInput: document.querySelector('.userspeech'),
   nightElements: [
@@ -102,6 +104,36 @@ const elements = {
 
 const initializeSpeechSynthesis = () => {
   state.synth = window.speechSynthesis;
+};
+
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', e => {
+  // Prevent Chrome 67 and earlier from automatically showing the prompt
+  e.preventDefault();
+  // Stash the event so it can be triggered later.
+  deferredPrompt = e;
+});
+
+const addToHomeScreenBtn = () => {
+  elements.addToHomeScreenPrompt.style.display = 'block';
+};
+
+const acceptHomeButtonPrompt = () => {
+  console.log('nice');
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(choiceResult => {
+    if (choiceResult.outcome === 'accepted') {
+      console.log('accepted');
+    } else {
+      console.log('dismissed');
+    }
+  });
+  cancelHomeButtonPrompt();
+};
+
+const cancelHomeButtonPrompt = () => {
+  elements.addToHomeScreenPrompt.style.display = 'none';
 };
 
 const findNearestHospital = (location, hospitals) => {
