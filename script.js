@@ -38,23 +38,31 @@ const state = {
 const database = {
   hospitals: [
     {
-      name: 'Yunus Emre Devlet Hastanesi',
+      name: 'Eskişehir Yunus Emre Devlet Hastanesi',
       location: {
-        longitude: 10,
-        latitude: 10
+        longitude: 39.7726,
+        latitude: 30.5098
       },
       earliestDateAvailable: ''
     },
     {
       name: 'Eskişehir Şehir Hastanesi',
       location: {
-        longitude: 3,
-        latitude: 3
+        longitude: 39.7477,
+        latitude: 30.5952
       },
       earliestDateAvailable: ''
     },
     {
-      name: 'İzmir Devlet Hastanesi',
+      name: 'Osmangazi Üniversitesi Hastanesi',
+      location: {
+        longitude: 39.7516,
+        latitude: 30.4884
+      },
+      earliestDateAvailable: ''
+    },
+    {
+      name: 'İzmir Urla Devlet Hastanesi',
       location: {
         longitude: 38.3305,
         latitude: 26.7455
@@ -65,17 +73,225 @@ const database = {
   symp2clinic: [
     {
       id: 101,
-      alias: 'baş ağrısı',
+      alias: 'Baş Ağrısı',
       bodyPart: ['baş'],
       complaint: ['ağrıyor', 'ağrı', 'ağrıs'],
-      clinics: ['K.B.B.', 'Nöroloji', 'Dahiliye']
+      clinics: ['Nöroloji', 'Beyin Cerrahisi', 'Göz']
     },
     {
       id: 102,
-      alias: 'mide bulantısı',
+      alias: 'Mide Bulantısı',
       bodyPart: ['mide', 'mi'],
       complaint: ['bulan', 'bula', 'bulantı', 'bulanmak', 'bulanıyor'],
       clinics: ['Dahiliye', 'Gastroentereloji']
+    },
+    {
+      id: 103,
+      alias: 'Karın Ağrısı',
+      bodyPart: ['karın', 'karn', 'karnı', 'karını'],
+      complaint: ['ağrıyor', 'ağrı', 'ağrıs'],
+      clinics: ['Dahiliye', 'Genel Cerrahi', 'Kadın Hastalıkları']
+    },
+    {
+      id: 104,
+      alias: 'Kulak Çınlaması',
+      bodyPart: ['kulak'],
+      complaint: ['çınlama', 'çınla', 'çınlamas', 'çınlıyor'],
+      clinics: ['K.B.B.', 'Nöroloji']
+    },
+    {
+      id: 105,
+      alias: 'Göğüs Ağrısı',
+      bodyPart: ['göğüs', 'göğs'],
+      complaint: ['ağrıyor', 'ağrı', 'ağrıs'],
+      clinics: ['Göğüs Hastalıkları', 'Kardiyoloji', 'Dahiliye']
+    },
+    {
+      id: 106,
+      alias: 'Bel Ağrısı',
+      bodyPart: ['bel'],
+      complaint: ['ağrıyor', 'ağrı', 'ağrıs'],
+      clinics: ['Fizik Tedavi', 'Ortopedi', 'Beyin Cerrahisi']
+    },
+    {
+      id: 107,
+      alias: 'Sırt Ağrısı',
+      bodyPart: ['sırt', 'sır'],
+      complaint: ['ağrıyor', 'ağrı', 'ağrıs'],
+      clinics: ['Fizik Tedavi', 'Ortopedi', 'Beyin Cerrahisi']
+    },
+    {
+      id: 115,
+      alias: 'Göz Kaşıntısı',
+      bodyPart: ['göz'],
+      complaint: ['kaş', 'kaşıntı', 'kaşınıyor'],
+      clinics: ['Göz', 'Alerji']
+    },
+    {
+      id: 108,
+      alias: 'Kaşıntı',
+      bodyPart: ['kaş', 'kaşıntı', 'kaşınıyor'],
+      complaint: ['kaş', 'kaşıntı', 'kaşınıyor'],
+      clinics: ['Dermatoloji', 'Dahiliye']
+    },
+    {
+      id: 109,
+      alias: 'Kızarıklık',
+      bodyPart: ['kızarıklık', 'kızarık', 'kızar', 'kızartı'],
+      complaint: ['kızarıklık', 'kızarık', 'kızar', 'kızartı'],
+      clinics: ['Dermatoloji', 'Dahiliye']
+    },
+    {
+      id: 110,
+      alias: 'İshal / Kabız / Gaz',
+      bodyPart: ['ishal', 'kabız', 'kap', 'gaz', 'kabızlık'],
+      complaint: [
+        'sıkışıyor',
+        'sıkışma',
+        'sıkışmas',
+        'sıkış',
+        'ishal',
+        'kabız',
+        'kap',
+        'ol',
+        'gaz'
+      ],
+      clinics: ['Dahiliye', 'Genel Cerrahi']
+    },
+    {
+      id: 111,
+      alias: 'Boğaz Ağrısı',
+      bodyPart: ['boğaz'],
+      complaint: ['ağrıyor', 'ağrı', 'ağrıs'],
+      clinics: ['K.B.B.']
+    },
+    {
+      id: 112,
+      alias: 'Kusma',
+      bodyPart: ['kus', 'kusuyor', 'kustum', 'kusma'],
+      complaint: ['kus', 'kusuyor', 'kustum', 'kusma'],
+      clinics: ['Dahiliye', 'Genel Cerrahi', 'Nöroloji', 'Beyin Cerrahisi']
+    },
+    {
+      id: 113,
+      alias: 'Ateş',
+      bodyPart: ['ateş', 'ateşlen', 'ateşle', 'ateşlendim', 'ateşlenmek'],
+      complaint: [
+        'ateşleniyor',
+        'ateşle',
+        'ateşlendim',
+        'yüksek',
+        'yükselmek',
+        'yük',
+        'çok',
+        'yüksel',
+        'yükseliyor',
+        'arttı'
+      ],
+      clinics: ['Enfeksiyon', 'Dahiliye', 'Nöroloji', 'Onkoloji']
+    },
+    {
+      id: 114,
+      alias: 'Burun Akıntısı / Tıkanıklığı',
+      bodyPart: ['burun', 'burn', 'burnum'],
+      complaint: [
+        'ak',
+        'akıntısı',
+        'akıyor',
+        'tıkal',
+        'tıkanık',
+        'tıkanıyor',
+        'tıkan',
+        'tıkanıklık'
+      ],
+      clinics: ['K.B.B.', 'Nöroloji', 'Dahiliye']
+    },
+    {
+      id: 116,
+      alias: 'Göz Ağrısı',
+      bodyPart: ['göz'],
+      complaint: ['ağrıyor', 'ağrı', 'ağrıs'],
+      clinics: ['Göz', 'Nöroloji']
+    },
+    {
+      id: 117,
+      alias: 'Göz Batması / Yanması',
+      bodyPart: ['göz'],
+      complaint: ['bat', 'batıyor', 'batmas', 'yanıyor', 'yanma'],
+      clinics: ['K.B.B.', 'Nöroloji', 'Dahiliye']
+    },
+    {
+      id: 118,
+      alias: 'Ayak Ağrısı',
+      bodyPart: ['ayak'],
+      complaint: ['ağrıyor', 'ağrı', 'ağrıs'],
+      clinics: ['Ortopedi', 'Dahiliye']
+    },
+    {
+      id: 119,
+      alias: 'Tansiyon',
+      bodyPart: ['tansiyon', 'tansiyo'],
+      complaint: [
+        'düşüyor',
+        'düş',
+        'yük',
+        'yüksel',
+        'çık',
+        'çıkmış',
+        'yükseliyor',
+        'fırladı',
+        'fırlıyor'
+      ],
+      clinics: ['Dahiliye', 'Kalp Cerrahisi']
+    },
+    {
+      id: 120,
+      alias: 'El Titremesi',
+      bodyPart: ['el'],
+      complaint: ['titriyor', 'titre', 'titremes'],
+      clinics: ['Nöroloji', 'Dahiliye']
+    },
+    {
+      id: 121,
+      alias: 'Boyun / Bel Tutulması',
+      bodyPart: ['boyun', 'boyn', 'boy', 'bel'],
+      complaint: ['tutul', 'tutuluyor', 'tutuk'],
+      clinics: ['Ortopedi', 'Fizik Tedavi']
+    },
+    {
+      id: 122,
+      alias: 'Kalp Sıkışması',
+      bodyPart: ['kalp'],
+      complaint: ['sıkışıyor', 'sıkış', 'sıkışma', 'sıkışmas'],
+      clinics: ['Kardiyoloji', 'Dahiliye', 'Psikiyatri']
+    },
+    {
+      id: 123,
+      alias: 'Nefes Darlığı',
+      bodyPart: ['nefes'],
+      complaint: ['darlık', 'daralıyor', 'daral'],
+      clinics: ['Göğüs Hastalığı', 'Kardiyoloji', 'Dahiliye']
+    },
+    {
+      id: 124,
+      alias: 'Öksürük',
+      bodyPart: ['öksürmek', 'öksürük', 'öksürüyor'],
+      complaint: ['öksürmek', 'öksürük', 'öksürüyor', 'var'],
+      clinics: ['K.B.B.', 'Dahiliye']
+    },
+    {
+      id: 125,
+      alias: 'Halsizlik',
+      bodyPart: ['halsiz', 'halsizlik'],
+      complaint: ['halsiz', 'halsizlik', 'var'],
+      clinics: ['Dahiliye', 'Nöroloji']
+    },
+    {
+      id: 126,
+      alias: 'Baş Dönmesi',
+      bodyPart: ['baş'],
+      complaint: ['dönüyor', 'dö', 'dönme', 'dönmes'],
+      clinics: ['Nöroloji', 'K.B.B.', 'Kadın Hastalıkları']
     }
   ]
 };
@@ -107,6 +323,10 @@ const initializeSpeechSynthesis = () => {
 };
 
 let deferredPrompt;
+
+const resizeHeight = () => {
+  document.querySelector('.assistant').style.height = `${window.innerHeight}px`;
+};
 
 window.addEventListener('beforeinstallprompt', e => {
   // Prevent Chrome 67 and earlier from automatically showing the prompt
@@ -400,10 +620,11 @@ const handleSendMessage = () => {
   const msg = elements.userSpeechInput.value;
   elements.userSpeechInput.value = '';
   if (checkCode(msg)) {
-    return true;
+    return false;
   }
   createMessage('outgoing', msg, elements.messages);
   state.userMessageCallbackFunction(msg);
+  return false;
 };
 
 const createMessage = (type, msg, messagelist, synthesize = 1) => {
@@ -432,6 +653,10 @@ const createMessage = (type, msg, messagelist, synthesize = 1) => {
 };
 
 window.onload = () => {
+  document.querySelector('.assistant').scroll = document.querySelector(
+    '.assistant'
+  ).scrollHeight;
+  resizeHeight();
   initializeSpeechRecognition();
   initializeSpeechSynthesis();
 };
@@ -457,7 +682,14 @@ const getApprove = (nextFunc, rejectFunc) => {
         .toLowerCase()
         .split(' ')
         .filter(el =>
-          ['evet', 'onaylıyorum', 'onay', 'doğru', 'aynen'].includes(el)
+          [
+            'evet',
+            'onaylıyorum',
+            'onay',
+            'doğru',
+            'aynen',
+            'doğrudur'
+          ].includes(el)
         ).length > 0
     ) {
       nextFunc();
@@ -478,7 +710,7 @@ const gotName = message => {
   } else {
     createMessage(
       'incoming',
-      `Adınız ve soyadınız, ${message}. Onaylıyor musunuz ?`,
+      `Adınız ve soyadınız, <strong>${message}</strong>. Onaylıyor musunuz ?`,
       elements.messages
     );
     state.user.name = message;
@@ -505,10 +737,10 @@ const gotID = message => {
   } else {
     createMessage(
       'incoming',
-      `TC Kimlik numaranız, ${id
+      `TC Kimlik numaranız, <strong>${id
         .toString()
         .match(/.{3}|.{1,2}/g)
-        .join('-')} . Onaylıyor musunuz ?`,
+        .join(' . ')}</strong> . Onaylıyor musunuz ?`,
       elements.messages
     );
     state.user.tc = id;
@@ -613,7 +845,7 @@ const gotAppointment = message => {
 
 const acceptAppointment = message => {
   getInfo(
-    'Randevu kaydedildi! Lütfen randevu saatinden 15 dakika önce hastanede olunuz. Geçmis olsun!',
+    'Randevu kaydedildi! Lütfen randevu saatinden 15 dakika önce hastanede olunuz. Geçmiş olsun!',
     () => {
       createMessage(
         'incoming',

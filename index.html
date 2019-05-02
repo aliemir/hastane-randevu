@@ -41,7 +41,7 @@
     </script>
   </head>
 
-  <body>
+  <body onresize="resizeHeight()">
     <div id="addToHomeScreenPrompt" class="addToHomeScreenPrompt">
       <div class="promptAdd">
         Uygulamayi telefonunuza indirmek ister misiniz ?
@@ -89,15 +89,22 @@
         </li>
       </ul>
       <div class="text-input">
-        <input
-          type="text"
-          class="userspeech"
-          value=""
-          placeholder="Yazmak icin dokunun veya konusun"
-        />
-        <button class="sendMessageBtn" onclick="handleSendMessage()">
-          <i class="fa fa-paper-plane"></i>
-        </button>
+        <form id="messageForm" onsubmit="handleSendMessage()">
+          <input
+            type="text"
+            class="userspeech"
+            value=""
+            placeholder="Yazmak icin
+        dokunun veya konusun"
+          />
+          <button
+            type="button"
+            class="sendMessageBtn"
+            onclick="handleSendMessage()"
+          >
+            <i class="fa fa-paper-plane"></i>
+          </button>
+        </form>
       </div>
       <div class="actionButtons">
         <div
@@ -138,6 +145,6 @@
       </div>
     </div>
   </body>
-  <script src="node_modules/snowball/stemmer/lib/Snowball.min.js"></script>
+  <script src="Snowball.min.js"></script>
   <script src="script.js"></script>
 </html>
